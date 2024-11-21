@@ -1,6 +1,14 @@
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//bazel:copts.bzl", "cxxopts")
+
+bool_flag(
+    name = "enable",
+    build_setting_default = False,
+)
+
+config_setting(name = "_enable", flag_values = {":enable": "True"}, visibility = ["//visibility:private"])
 
 package(default_visibility = ["//visibility:public"])
 
@@ -10,6 +18,10 @@ cc_library(
     name = "TracyClient",
     strip_include_prefix = "public",
     cxxopts = cxxopts,
+    defines = select({
+        ":_enable": ["TRACY_ENABLE"],
+        "//conditions:default": [],
+    }),
     includes = ["public"],
     hdrs = glob(["public/**/*"]),
     srcs = ["public/TracyClient.cpp"],
