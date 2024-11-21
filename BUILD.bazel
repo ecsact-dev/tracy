@@ -1,0 +1,85 @@
+load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//bazel:copts.bzl", "cxxopts")
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files(glob(["public/**/*"]))
+
+cc_library(
+    name = "TracyClient",
+    strip_include_prefix = "public",
+    cxxopts = cxxopts,
+    includes = ["public"],
+    hdrs = glob(["public/**/*"]),
+    srcs = ["public/TracyClient.cpp"],
+)
+
+copy_file(
+    name = "tracy_lz4_hpp",
+    src = "public/common/tracy_lz4.hpp",
+    out = "tracy_lz4.hpp",
+)
+
+copy_file(
+    name = "tracy_lz4hc_hpp",
+    src = "public/common/tracy_lz4hc.hpp",
+    out = "tracy_lz4hc.hpp",
+)
+
+copy_file(
+    name = "tracy_lz4_cpp",
+    src = "public/common/tracy_lz4.cpp",
+    out = "tracy_lz4.cpp",
+)
+
+copy_file(
+    name = "tracy_lz4hc_cpp",
+    src = "public/common/tracy_lz4hc.cpp",
+    out = "tracy_lz4hc.cpp",
+)
+
+cc_library(
+    name = "tracy_lz4",
+    cxxopts = cxxopts,
+    hdrs = [
+        ":tracy_lz4_hpp",
+        ":tracy_lz4hc_hpp",
+        ":tracy_lz4_cpp",
+        ":tracy_lz4hc_cpp",
+    ],
+    srcs = [
+        ":tracy_lz4_cpp",
+        ":tracy_lz4hc_cpp",
+    ],
+)
+
+cc_binary(
+    name = "TracyServer",
+    cxxopts = cxxopts,
+    includes = ["server"],
+    srcs = glob([
+        # main srcs
+        "server/*.cpp",
+        "server/*.hpp",
+        "server/*.h",
+
+        # common srcs
+        "public/common/**/*",
+
+        # deps srcs
+        "zstd/**/*.c",
+        "zstd/**/*.h",
+    ], exclude = [
+        "public/common/tracy_lz4.cpp",
+        "public/common/tracy_lz4hc.cpp",
+    ]),
+    tags = ["manual"],
+    deps = [
+        ":tracy_lz4",
+        # "@capstone",
+    ],
+)
+
+alias(name = "server", actual = ":TracyServer", tags = ["manual"])
+alias(name = "tracy", actual = ":TracyClient")
