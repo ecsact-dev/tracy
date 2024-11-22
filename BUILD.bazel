@@ -34,4 +34,4 @@ cc_library(
     srcs = ["public/TracyClient.cpp"],
 )
 
-alias(name = "tracy", actual = ":TracyClient")
+alias(name = "tracy", actual = ":TracyClient", visibility = ["//visibility:public"])
