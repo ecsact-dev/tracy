@@ -20,7 +20,7 @@ cc_library(
     name = "TracyClient",
     strip_include_prefix = "public",
     visibility = ["//visibility:public"],
-    cxxopts = select({,
+    cxxopts = select({
         "@rules_cc//cc/compiler:msvc-cl": ["/std:c++20"],
         "//conditions:default": ["-std=c++20"],
     }),
