@@ -38,7 +38,7 @@ alias(name = "tracy", actual = ":TracyClient", visibility = ["//visibility:publi
 
 filegroup(
     name = "tracy_srcs",
-    visibility = ["//visiblity:public"],
+    visibility = ["//visibility:public"],
     srcs = [
         "public/TracyClient.cpp",
         "public/tracy/TracyC.h",
