@@ -16,6 +16,12 @@ config_setting(name = "_on_demand", flag_values = {":on_demand": "True"})
 bool_flag(name = "fibers", build_setting_default = False, visibility = ["//visibility:public"])
 config_setting(name = "_fibers", flag_values = {":fibers": "True"})
 
+bool_flag(name = "manual_lifetime", build_setting_default = False, visibility = ["//visibility:public"])
+config_setting(name = "_manual_lifetime", flag_values = {":manual_lifetime": "True"})
+
+bool_flag(name = "delayed_init", build_setting_default = False, visibility = ["//visibility:public"])
+config_setting(name = "_delayed_init", flag_values = {":delayed_init": "True"})
+
 cc_library(
     name = "TracyClient",
     strip_include_prefix = "public",
@@ -28,7 +34,9 @@ cc_library(
         select({":_enable": ["TRACY_ENABLE"], "//conditions:default": []}) +
         select({":_broadcast": [], "//conditions:default": ["TRACY_NO_BROADCAST"]}) +
         select({":_on_demand": ["TRACY_ON_DEMAND"], "//conditions:default": []}) +
-        select({":_fibers": ["TRACY_FIBERS"], "//conditions:default": []}),
+        select({":_fibers": ["TRACY_FIBERS"], "//conditions:default": []}) +
+        select({":_manual_lifetime": ["TRACY_MANUAL_LIFETIME"], "//conditions:default": []}) +
+        select({":_delayed_init": ["TRACY_DELAYED_INIT"], "//conditions:default": []}),
     includes = ["public"],
     hdrs = glob(["public/**/*"]),
     srcs = ["public/TracyClient.cpp"],
