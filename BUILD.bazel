@@ -16,6 +16,15 @@ config_setting(name = "_on_demand", flag_values = {":on_demand": "True"})
 bool_flag(name = "fibers", build_setting_default = False, visibility = ["//visibility:public"])
 config_setting(name = "_fibers", flag_values = {":fibers": "True"})
 
+bool_flag(name = "manual_lifetime", build_setting_default = False, visibility = ["//visibility:public"])
+config_setting(name = "_manual_lifetime", flag_values = {":manual_lifetime": "True"})
+
+bool_flag(name = "delayed_init", build_setting_default = False, visibility = ["//visibility:public"])
+config_setting(name = "_delayed_init", flag_values = {":delayed_init": "True"})
+
+bool_flag(name = "tracy_imports", build_setting_default = False, visibility = ["//visibility:public"])
+config_setting(name = "_tracy_imports", flag_values = {":tracy_imports": "True"})
+
 cc_library(
     name = "TracyClient",
     strip_include_prefix = "public",
@@ -28,10 +37,81 @@ cc_library(
         select({":_enable": ["TRACY_ENABLE"], "//conditions:default": []}) +
         select({":_broadcast": [], "//conditions:default": ["TRACY_NO_BROADCAST"]}) +
         select({":_on_demand": ["TRACY_ON_DEMAND"], "//conditions:default": []}) +
-        select({":_fibers": ["TRACY_FIBERS"], "//conditions:default": []}),
+        select({":_fibers": ["TRACY_FIBERS"], "//conditions:default": []}) +
+        select({":_manual_lifetime": ["TRACY_MANUAL_LIFETIME"], "//conditions:default": []}) +
+        select({":_delayed_init": ["TRACY_DELAYED_INIT"], "//conditions:default": []}) +
+        select({":_tracy_imports": ["TRACY_IMPORTS"], "//conditions:default": []}),
     includes = ["public"],
     hdrs = glob(["public/**/*"]),
-    srcs = ["public/TracyClient.cpp"],
+    srcs = select({
+        ":_tracy_imports": [],
+        "//conditions:default": ["public/TracyClient.cpp"],
+    }),
 )
 
 alias(name = "tracy", actual = ":TracyClient", visibility = ["//visibility:public"])
+
+filegroup(
+    name = "tracy_srcs",
+    visibility = ["//visibility:public"],
+    srcs = [
+        "public/TracyClient.cpp",
+        "public/tracy/TracyC.h",
+        "public/tracy/Tracy.hpp",
+        "public/tracy/TracyD3D11.hpp",
+        "public/tracy/TracyD3D12.hpp",
+        "public/tracy/TracyLua.hpp",
+        "public/tracy/TracyOpenCL.hpp",
+        "public/tracy/TracyOpenGL.hpp",
+        "public/tracy/TracyVulkan.hpp",
+        "public/common/TracyColor.hpp",
+        "public/common/TracyAlign.hpp",
+        "public/common/TracyAlloc.hpp",
+        "public/common/TracyApi.h",
+        "public/common/TracyForceInline.hpp",
+        "public/common/TracyMutex.hpp",
+        "public/common/TracyProtocol.hpp",
+        "public/common/TracyQueue.hpp",
+        "public/common/TracySocket.hpp",
+        "public/common/TracyStackFrames.hpp",
+        "public/common/TracySystem.hpp",
+        "public/common/TracyUwp.hpp",
+        "public/common/TracyVersion.hpp",
+        "public/common/TracyYield.hpp",
+        "public/common/tracy_lz4.hpp",
+        "public/common/tracy_lz4hc.hpp",
+        "public/common/TracySystem.cpp",
+        "public/common/tracy_lz4.cpp",
+        "public/common/TracySocket.cpp",
+        "public/client/TracyArmCpuTable.hpp",
+        "public/client/TracyCallstack.h",
+        "public/client/TracyCallstack.hpp",
+        "public/client/TracyCpuid.hpp",
+        "public/client/TracyDebug.hpp",
+        "public/client/TracyDxt1.hpp",
+        "public/client/TracyFastVector.hpp",
+        "public/client/TracyKCore.hpp",
+        "public/client/TracyLock.hpp",
+        "public/client/TracyProfiler.hpp",
+        "public/client/TracyRingBuffer.hpp",
+        "public/client/TracyScoped.hpp",
+        "public/client/TracyStringHelpers.hpp",
+        "public/client/TracySysPower.hpp",
+        "public/client/TracySysTime.hpp",
+        "public/client/TracySysTrace.hpp",
+        "public/client/TracyThread.hpp",
+        "public/client/tracy_SPSCQueue.h",
+        "public/client/tracy_concurrentqueue.h",
+        "public/client/tracy_rpmalloc.hpp",
+        "public/client/TracyAlloc.cpp",
+        "public/client/TracyCallstack.cpp",
+        "public/client/TracyDxt1.cpp",
+        "public/client/TracyKCore.cpp",
+        "public/client/TracyOverride.cpp",
+        "public/client/TracyProfiler.cpp",
+        "public/client/TracySysPower.cpp",
+        "public/client/TracySysTime.cpp",
+        "public/client/TracySysTrace.cpp",
+        "public/client/tracy_rpmalloc.cpp",
+    ],
+)
