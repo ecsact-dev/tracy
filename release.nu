@@ -11,4 +11,4 @@ buildozer $"set version ($new_version)" "//MODULE.bazel:%module";
 git add MODULE.bazel;
 git commit -m $"chore: update bzlmod version ($new_version)";
 git push;
-gh release create $"ecsact-bzlmod-($new_version)" --generate_notes;
+gh release create $"ecsact-bzlmod-($new_version)" --generate-notes;
